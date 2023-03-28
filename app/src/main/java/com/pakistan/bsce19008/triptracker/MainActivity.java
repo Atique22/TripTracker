@@ -62,14 +62,14 @@ public class MainActivity extends AppCompatActivity {
             String[] permissions = new String[] { Manifest.permission.ACCESS_FINE_LOCATION };
             ActivityCompat.requestPermissions(this, permissions, permissionCode);
         }
-        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 0, new LocationListener() {
-            @Override
-            public void onLocationChanged(@NonNull Location location) {
-                double latitude = location.getLatitude();
-                double longitude = location.getLongitude();
-            }
-        });
-        
+//        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000, 0, new LocationListener() {
+//            @Override
+//            public void onLocationChanged(@NonNull Location location) {
+//                double latitude = location.getLatitude();
+//                double longitude = location.getLongitude();
+//            }
+//        });
+
         sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         accelerometerSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         gyroscopeSensor = sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
