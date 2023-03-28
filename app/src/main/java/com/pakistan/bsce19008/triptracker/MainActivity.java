@@ -2,8 +2,10 @@ package com.pakistan.bsce19008.triptracker;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -21,6 +23,7 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import android.Manifest;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -51,7 +54,22 @@ public class MainActivity extends AppCompatActivity {
         textViewTitle = findViewById(R.id.tripTitleView);
         textViewCurrentDetail = findViewById(R.id.CurrentTripDetail);
 
+        int permissionCode = 1;
+        int fine = ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION);
+        int coarse = ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION);
 
+        if (fine != PackageManager.PERMISSION_GRANTED && coarse != PackageManager.PERMISSION_GRANTED) {
+            String[] permissions = new String[] { Manifest.permission.ACCESS_FINE_LOCATION };
+            ActivityCompat.requestPermissions(this, permissions, permissionCode);
+        }
+        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 0, new LocationListener() {
+            @Override
+            public void onLocationChanged(@NonNull Location location) {
+                double latitude = location.getLatitude();
+                double longitude = location.getLongitude();
+            }
+        });
+        
         sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         accelerometerSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         gyroscopeSensor = sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
@@ -65,12 +83,7 @@ public class MainActivity extends AppCompatActivity {
                     startTime = System.currentTimeMillis();
                     isTripStarted = true;
                 }
-//              locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 0, new LocationListener() {
-//                        @Override
-//                        public void onLocationChanged(@NonNull Location location) {
-//
-//                        }
-//                    });
+
 //                accelerometerSensor
                 sensorManager.registerListener(new SensorEventListener() {
                     @Override
@@ -95,6 +108,7 @@ public class MainActivity extends AppCompatActivity {
                     public void onAccuracyChanged(Sensor sensor, int accuracy) {
                     }
                 },gyroscopeSensor,sensorManager.SENSOR_DELAY_NORMAL);
+                Log.d("here i click to start app", "onClick: start is running ");
             }
         });
         //stop trip
@@ -114,6 +128,7 @@ public class MainActivity extends AppCompatActivity {
                 }
                 // set the text of the TextView to the violations text
                 textViewCurrentDetail.setText(violationsText.toString());
+                Log.d("here i click to stop app", "onClick: stop is running ");
             }
         });
 
