@@ -127,7 +127,7 @@ public class MainActivity extends AppCompatActivity {
                     violationsText.append(violation).append("\n\n");
                 }
                 // set the text of the TextView to the violations text
-                textViewCurrentDetail.setText(violationsText.toString());
+                textViewCurrentDetail.setText("Time: "+startTime);
                 Log.d("here i click to stop app", "onClick: stop is running ");
             }
         });
