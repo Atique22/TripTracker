@@ -4,8 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#EFEAEA"
-    android:backgroundTint="#D3C8C8"
+    android:background="#E6DEDE"
+    android:backgroundTint="#494444"
     tools:context=".MainActivity">
 
     <Button
@@ -65,32 +65,20 @@
 
     <ScrollView
         android:id="@+id/scrollView4"
-        android:layout_width="348dp"
-        android:layout_height="397dp"
-        android:layout_marginStart="30dp"
-        android:layout_marginTop="16dp"
-        android:layout_marginEnd="30dp"
-        android:layout_marginBottom="87dp"
+        android:layout_width="331dp"
+        android:layout_height="360dp"
+        android:layout_marginBottom="56dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tripTitleView">
+        app:layout_constraintTop_toBottomOf="@+id/tripTitleView"
+        app:layout_constraintVertical_bias="0.928">
 
-        <LinearLayout
+        <TextView
+            android:id="@+id/CurrentTripDetail"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
-
-        </LinearLayout>
+            android:textSize="16sp" />
     </ScrollView>
 
-    <TextView
-        android:id="@+id/CurrentTripDetail"
-        android:layout_width="329dp"
-        android:layout_height="355dp"
-        android:textSize="16sp"
-        app:layout_constraintBottom_toBottomOf="@+id/scrollView4"
-        app:layout_constraintEnd_toEndOf="@+id/scrollView4"
-        app:layout_constraintStart_toStartOf="@+id/scrollView4"
-        app:layout_constraintTop_toTopOf="@+id/scrollView4" />
 </androidx.constraintlayout.widget.ConstraintLayout>

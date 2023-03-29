@@ -20,6 +20,8 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import java.sql.Time;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -37,10 +39,15 @@ public class MainActivity extends AppCompatActivity {
     private static final float MAX_ACCELERATION = 10.0f; // m/s^2
     private static final float MAX_TURNING_RATE = 5.0f; // rad/s
     private static final float MAX_SPEED = 20.0f; // km/h
+    private float lastAccelValue = 0.0f;
+    private float accelThreshold = 10.0f; // set the threshold for harsh braking m/s^2
+
 
     private List<Violation> violations = new ArrayList<>();
     private Location currentLocation;
-    private long startTime;
+     Date startTime;
+     Date endTime;
+//    private long startTime;
     private boolean isTripStarted;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,6 +60,8 @@ public class MainActivity extends AppCompatActivity {
 //        TextView Access
         textViewTitle = findViewById(R.id.tripTitleView);
         textViewCurrentDetail = findViewById(R.id.CurrentTripDetail);
+        SimpleDateFormat formatter = new SimpleDateFormat(" MMMM,h:mm a");
+
 
         int permissionCode = 1;
         int fine = ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION);
@@ -80,9 +89,12 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 if (!isTripStarted) {
-                    startTime = System.currentTimeMillis();
+                    startTime = new Date();
+                    String formattedDateStart = formatter.format(startTime);
+                    textViewCurrentDetail.append(formattedDateStart +" - start \n");
                     isTripStarted = true;
                 }
+//                textViewCurrentDetail.append("\nStart Time: "+startTime +"\n End Time: "+endTime);
 
 //                accelerometerSensor
                 sensorManager.registerListener(new SensorEventListener() {
@@ -91,11 +103,25 @@ public class MainActivity extends AppCompatActivity {
                         float acc_x = event.values[0];
                         float acc_y = event.values[1];
                         float acc_z = event.values[2];
+                        // Calculate the change in acceleration
+                        float accelChange = Math.abs(acc_x - lastAccelValue);
+                        lastAccelValue = acc_x;
+                        // Check if the change in acceleration exceeds the threshold
+                        if (accelChange > accelThreshold) {
+                            Date accTime = new Date();
+                            String formattedAccTime = formatter.format(accTime);
+                            // Harsh braking detected
+                            textViewCurrentDetail.append(formattedAccTime +" - Harsh break \n");
+                        }
+
                     }
                     @Override
                     public void onAccuracyChanged(Sensor sensor, int accuracy) {
                     }
                 },accelerometerSensor,sensorManager.SENSOR_DELAY_NORMAL);
+
+
+
 //                gyroscopeSensor
                 sensorManager.registerListener(new SensorEventListener() {
                     @Override
@@ -108,6 +134,9 @@ public class MainActivity extends AppCompatActivity {
                     public void onAccuracyChanged(Sensor sensor, int accuracy) {
                     }
                 },gyroscopeSensor,sensorManager.SENSOR_DELAY_NORMAL);
+
+
+
                 Log.d("here i click to start app", "onClick: start is running ");
             }
         });
@@ -117,6 +146,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View view) {
 //                sensorManager.unregisterListener();
 //                locationManager.removeUpdates(this);
+                endTime = new Date();
                 if (isTripStarted) {
                     isTripStarted = false;
                 }
@@ -124,10 +154,12 @@ public class MainActivity extends AppCompatActivity {
                 StringBuilder violationsText = new StringBuilder();
                 // iterate over the list of violations and append each violation's details to the StringBuilder
                 for (Violation violation : violations) {
-                    violationsText.append(violation).append("\n\n");
+                    violationsText.append(violation).append("\n\nEnd: "+endTime);
                 }
+                violationsText.append("\n\n"+"Start: "+startTime+"\n\n"+"End: "+endTime);
+
                 // set the text of the TextView to the violations text
-                textViewCurrentDetail.setText("Time: "+startTime);
+                textViewCurrentDetail.append(violationsText);
                 Log.d("here i click to stop app", "onClick: stop is running ");
             }
         });
