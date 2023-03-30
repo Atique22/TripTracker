@@ -4,6 +4,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.hardware.Sensor;
@@ -41,7 +42,13 @@ public class MainActivity extends AppCompatActivity {
     private static final float MAX_SPEED = 20.0f; // km/h
     private float lastAccelValue = 0.0f;
     private float accelThreshold = 10.0f; // set the threshold for harsh braking m/s^2
+    private float accelChangeThreshold = 20.0f; // set the threshold for strong acceleration m/s^2
+    private float speedThreshold = 20.0f; // set the threshold for strong acceleration m/s^2
+    float gyroThreshold = 5.0f; // set this to an appropriate value for detecting harsh turns
+    float gyroChangeThreshold = 1.0f; // set this to an appropriate value for detecting significant changes in gyroscope readings
 
+    float lastGyroValue = 0.0f;
+    float speedL;
 
     private List<Violation> violations = new ArrayList<>();
     private Location currentLocation;
@@ -79,6 +86,28 @@ public class MainActivity extends AppCompatActivity {
 //            }
 //        });
 
+        LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, new LocationListener() {
+            @Override
+            public void onLocationChanged(Location location) {
+                 speedL = location.getSpeed();
+                // Do something with the speed
+            }
+
+            @Override
+            public void onProviderEnabled(String provider) {
+            }
+
+            @Override
+            public void onProviderDisabled(String provider) {
+            }
+
+            @Override
+            public void onStatusChanged(String provider, int status, Bundle extras) {
+            }
+        });
+
+
         sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         accelerometerSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         gyroscopeSensor = sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
@@ -113,14 +142,25 @@ public class MainActivity extends AppCompatActivity {
                             // Harsh braking detected
                             textViewCurrentDetail.append(formattedAccTime +" - Harsh break \n");
                         }
-
+                        if (accelChange > accelChangeThreshold) {
+                            Date accTime = new Date();
+                            String formattedAccTime = formatter.format(accTime);
+                            // Strong acceleration detected
+                            textViewCurrentDetail.append(formattedAccTime + " - Strong acceleration \n");
+                        }
+                        // Check if the vehicle is overspeeding
+//                        float speed = event.values[6];
+                        if (speedL > speedThreshold) {
+                            Date speedTime = new Date();
+                            String formattedSpeedTime = formatter.format(speedTime);
+                            // Overspeeding detected
+                            textViewCurrentDetail.append(formattedSpeedTime + " - Overspeeding \n");
+                        }
                     }
                     @Override
                     public void onAccuracyChanged(Sensor sensor, int accuracy) {
                     }
                 },accelerometerSensor,sensorManager.SENSOR_DELAY_NORMAL);
-
-
 
 //                gyroscopeSensor
                 sensorManager.registerListener(new SensorEventListener() {
@@ -129,6 +169,17 @@ public class MainActivity extends AppCompatActivity {
                         float gyr_x = event.values[0];
                         float gyr_y = event.values[1];
                         float gyr_z = event.values[2];
+
+                        // Calculate the change in gyroscope readings
+                        float gyroChange = Math.abs(gyr_x - lastGyroValue);
+                        lastGyroValue = gyr_x;
+                        // Check if the change in gyroscope readings exceeds the threshold
+                        if (gyroChange > gyroChangeThreshold) {
+                            Date gyroTime = new Date();
+                            String formattedGyroTime = formatter.format(gyroTime);
+                            // Harsh turning detected
+                            textViewCurrentDetail.append(formattedGyroTime +" - Harsh turning \n");
+                        }
                     }
                     @Override
                     public void onAccuracyChanged(Sensor sensor, int accuracy) {
