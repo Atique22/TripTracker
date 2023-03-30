@@ -50,8 +50,8 @@ public class MainActivity extends AppCompatActivity {
     float lastGyroValue = 0.0f;
     float speedL;
 
-    private List<Violation> violations = new ArrayList<>();
-    private Location currentLocation;
+//    private List<Violation> violations = new ArrayList<>();
+//    private Location currentLocation;
      Date startTime;
      Date endTime;
 //    private long startTime;
@@ -68,6 +68,9 @@ public class MainActivity extends AppCompatActivity {
         textViewTitle = findViewById(R.id.tripTitleView);
         textViewCurrentDetail = findViewById(R.id.CurrentTripDetail);
         SimpleDateFormat formatter = new SimpleDateFormat(" MMMM,h:mm a");
+        //String to store all data
+        StringBuilder violationsBuilder = new StringBuilder();
+
 
 
         int permissionCode = 1;
@@ -78,32 +81,14 @@ public class MainActivity extends AppCompatActivity {
             String[] permissions = new String[] { Manifest.permission.ACCESS_FINE_LOCATION };
             ActivityCompat.requestPermissions(this, permissions, permissionCode);
         }
-//        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 1000, 0, new LocationListener() {
-//            @Override
-//            public void onLocationChanged(@NonNull Location location) {
-//                double latitude = location.getLatitude();
-//                double longitude = location.getLongitude();
-//            }
-//        });
-
         LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, new LocationListener() {
             @Override
             public void onLocationChanged(Location location) {
                  speedL = location.getSpeed();
+                    double latitude = location.getLatitude();
+                    double longitude = location.getLongitude();
                 // Do something with the speed
-            }
-
-            @Override
-            public void onProviderEnabled(String provider) {
-            }
-
-            @Override
-            public void onProviderDisabled(String provider) {
-            }
-
-            @Override
-            public void onStatusChanged(String provider, int status, Bundle extras) {
             }
         });
 
@@ -111,7 +96,6 @@ public class MainActivity extends AppCompatActivity {
         sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         accelerometerSensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         gyroscopeSensor = sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE);
-        locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
 
         //start trip
         startBtn.setOnClickListener(new View.OnClickListener() {
@@ -120,7 +104,7 @@ public class MainActivity extends AppCompatActivity {
                 if (!isTripStarted) {
                     startTime = new Date();
                     String formattedDateStart = formatter.format(startTime);
-                    textViewCurrentDetail.append(formattedDateStart +" - start \n");
+                    violationsBuilder.append(formattedDateStart +" - start \n");
                     isTripStarted = true;
                 }
 //                textViewCurrentDetail.append("\nStart Time: "+startTime +"\n End Time: "+endTime);
@@ -139,14 +123,16 @@ public class MainActivity extends AppCompatActivity {
                         if (accelChange > accelThreshold) {
                             Date accTime = new Date();
                             String formattedAccTime = formatter.format(accTime);
+//                            Violation violation = new Violation(Violation.Type.HARSH_BRAKING, accTime);
+//                            violations.add(violation);
                             // Harsh braking detected
-                            textViewCurrentDetail.append(formattedAccTime +" - Harsh break \n");
+                            violationsBuilder.append(formattedAccTime +" - Harsh break \n");
                         }
                         if (accelChange > accelChangeThreshold) {
                             Date accTime = new Date();
                             String formattedAccTime = formatter.format(accTime);
                             // Strong acceleration detected
-                            textViewCurrentDetail.append(formattedAccTime + " - Strong acceleration \n");
+                            violationsBuilder.append(formattedAccTime + " - Strong acceleration \n");
                         }
                         // Check if the vehicle is overspeeding
 //                        float speed = event.values[6];
@@ -154,7 +140,7 @@ public class MainActivity extends AppCompatActivity {
                             Date speedTime = new Date();
                             String formattedSpeedTime = formatter.format(speedTime);
                             // Overspeeding detected
-                            textViewCurrentDetail.append(formattedSpeedTime + " - Overspeeding \n");
+                            violationsBuilder.append(formattedSpeedTime + " - Overspeeding \n");
                         }
                     }
                     @Override
@@ -178,7 +164,7 @@ public class MainActivity extends AppCompatActivity {
                             Date gyroTime = new Date();
                             String formattedGyroTime = formatter.format(gyroTime);
                             // Harsh turning detected
-                            textViewCurrentDetail.append(formattedGyroTime +" - Harsh turning \n");
+                            violationsBuilder.append(formattedGyroTime +" - Harsh turning \n");
                         }
                     }
                     @Override
@@ -199,18 +185,9 @@ public class MainActivity extends AppCompatActivity {
 //                locationManager.removeUpdates(this);
                 endTime = new Date();
                 if (isTripStarted) {
+                    textViewCurrentDetail.append(startTime+" -Start\n"+endTime+" -End"+"\n\n\n Results:\n"+violationsBuilder);
                     isTripStarted = false;
                 }
-                // create a StringBuilder to store the violations text
-                StringBuilder violationsText = new StringBuilder();
-                // iterate over the list of violations and append each violation's details to the StringBuilder
-                for (Violation violation : violations) {
-                    violationsText.append(violation).append("\n\nEnd: "+endTime);
-                }
-                violationsText.append("\n\n"+"Start: "+startTime+"\n\n"+"End: "+endTime);
-
-                // set the text of the TextView to the violations text
-                textViewCurrentDetail.append(violationsText);
                 Log.d("here i click to stop app", "onClick: stop is running ");
             }
         });
