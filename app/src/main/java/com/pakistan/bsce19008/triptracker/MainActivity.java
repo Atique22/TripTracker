@@ -102,78 +102,81 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 if (!isTripStarted) {
+
                     startTime = new Date();
                     String formattedDateStart = formatter.format(startTime);
-                    violationsBuilder.append(formattedDateStart +" - start \n");
+                    textViewCurrentDetail.setText(formattedDateStart +" - start \nHave a nice journey......");
+//                    violationsBuilder.append(formattedDateStart +" - start \n");
+//                    accelerometerSensor
+                    sensorManager.registerListener(new SensorEventListener() {
+                        @Override
+                        public void onSensorChanged(SensorEvent event) {
+                            float acc_x = event.values[0];
+                            float acc_y = event.values[1];
+                            float acc_z = event.values[2];
+                            // Calculate the change in acceleration
+                            float accelChange = Math.abs(acc_x - lastAccelValue);
+                            lastAccelValue = acc_x;
+                            // Check if the change in acceleration exceeds the threshold
+                            if (accelChange > accelThreshold) {
+                                Date accTime = new Date();
+                                String formattedAccTime = formatter.format(accTime);
+//                            Violation violation = new Violation(Violation.Type.HARSH_BRAKING, accTime);
+//                            violations.add(violation);
+                                // Harsh braking detected
+                                violationsBuilder.append(formattedAccTime +" - Harsh break \n");
+                            }
+                            if (accelChange > accelChangeThreshold) {
+                                Date accTime = new Date();
+                                String formattedAccTime = formatter.format(accTime);
+                                // Strong acceleration detected
+                                violationsBuilder.append(formattedAccTime + " - Strong acceleration \n");
+                            }
+                            // Check if the vehicle is overspeeding
+//                        float speed = event.values[6];
+                            if (speedL > speedThreshold) {
+                                Date speedTime = new Date();
+                                String formattedSpeedTime = formatter.format(speedTime);
+                                // Overspeeding detected
+                                violationsBuilder.append(formattedSpeedTime + " - Overspeeding \n");
+                            }
+                        }
+                        @Override
+                        public void onAccuracyChanged(Sensor sensor, int accuracy) {
+                        }
+                    },accelerometerSensor,sensorManager.SENSOR_DELAY_NORMAL);
+
+//                gyroscopeSensor
+                    sensorManager.registerListener(new SensorEventListener() {
+                        @Override
+                        public void onSensorChanged(SensorEvent event) {
+                            float gyr_x = event.values[0];
+                            float gyr_y = event.values[1];
+                            float gyr_z = event.values[2];
+
+                            // Calculate the change in gyroscope readings
+                            float gyroChange = Math.abs(gyr_x - lastGyroValue);
+                            lastGyroValue = gyr_x;
+                            // Check if the change in gyroscope readings exceeds the threshold
+                            if (gyroChange > gyroChangeThreshold) {
+                                Date gyroTime = new Date();
+                                String formattedGyroTime = formatter.format(gyroTime);
+                                // Harsh turning detected
+                                violationsBuilder.append(formattedGyroTime +" - Harsh turning \n");
+                            }
+                        }
+                        @Override
+                        public void onAccuracyChanged(Sensor sensor, int accuracy) {
+                        }
+                    },gyroscopeSensor,sensorManager.SENSOR_DELAY_NORMAL);
+
+
+
                     isTripStarted = true;
                 }
 //                textViewCurrentDetail.append("\nStart Time: "+startTime +"\n End Time: "+endTime);
 
-//                accelerometerSensor
-                sensorManager.registerListener(new SensorEventListener() {
-                    @Override
-                    public void onSensorChanged(SensorEvent event) {
-                        float acc_x = event.values[0];
-                        float acc_y = event.values[1];
-                        float acc_z = event.values[2];
-                        // Calculate the change in acceleration
-                        float accelChange = Math.abs(acc_x - lastAccelValue);
-                        lastAccelValue = acc_x;
-                        // Check if the change in acceleration exceeds the threshold
-                        if (accelChange > accelThreshold) {
-                            Date accTime = new Date();
-                            String formattedAccTime = formatter.format(accTime);
-//                            Violation violation = new Violation(Violation.Type.HARSH_BRAKING, accTime);
-//                            violations.add(violation);
-                            // Harsh braking detected
-                            violationsBuilder.append(formattedAccTime +" - Harsh break \n");
-                        }
-                        if (accelChange > accelChangeThreshold) {
-                            Date accTime = new Date();
-                            String formattedAccTime = formatter.format(accTime);
-                            // Strong acceleration detected
-                            violationsBuilder.append(formattedAccTime + " - Strong acceleration \n");
-                        }
-                        // Check if the vehicle is overspeeding
-//                        float speed = event.values[6];
-                        if (speedL > speedThreshold) {
-                            Date speedTime = new Date();
-                            String formattedSpeedTime = formatter.format(speedTime);
-                            // Overspeeding detected
-                            violationsBuilder.append(formattedSpeedTime + " - Overspeeding \n");
-                        }
-                    }
-                    @Override
-                    public void onAccuracyChanged(Sensor sensor, int accuracy) {
-                    }
-                },accelerometerSensor,sensorManager.SENSOR_DELAY_NORMAL);
-
-//                gyroscopeSensor
-                sensorManager.registerListener(new SensorEventListener() {
-                    @Override
-                    public void onSensorChanged(SensorEvent event) {
-                        float gyr_x = event.values[0];
-                        float gyr_y = event.values[1];
-                        float gyr_z = event.values[2];
-
-                        // Calculate the change in gyroscope readings
-                        float gyroChange = Math.abs(gyr_x - lastGyroValue);
-                        lastGyroValue = gyr_x;
-                        // Check if the change in gyroscope readings exceeds the threshold
-                        if (gyroChange > gyroChangeThreshold) {
-                            Date gyroTime = new Date();
-                            String formattedGyroTime = formatter.format(gyroTime);
-                            // Harsh turning detected
-                            violationsBuilder.append(formattedGyroTime +" - Harsh turning \n");
-                        }
-                    }
-                    @Override
-                    public void onAccuracyChanged(Sensor sensor, int accuracy) {
-                    }
-                },gyroscopeSensor,sensorManager.SENSOR_DELAY_NORMAL);
-
-
-
+//
                 Log.d("here i click to start app", "onClick: start is running ");
             }
         });
@@ -181,10 +184,12 @@ public class MainActivity extends AppCompatActivity {
         stopBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+
+                if (isTripStarted) {
+                    textViewCurrentDetail.setText("");
 //                sensorManager.unregisterListener();
 //                locationManager.removeUpdates(this);
-                endTime = new Date();
-                if (isTripStarted) {
+                    endTime = new Date();
                     textViewCurrentDetail.append(startTime+" -Start\n"+endTime+" -End"+"\n\n\n Results:\n"+violationsBuilder);
                     isTripStarted = false;
                 }
