@@ -50,7 +50,6 @@ public class MainActivity extends AppCompatActivity {
     float lastGyroValue = 0.0f;
     float speedL;
 
-//    private List<Violation> violations = new ArrayList<>();
 //    private Location currentLocation;
      Date startTime;
      Date endTime;
@@ -187,8 +186,6 @@ public class MainActivity extends AppCompatActivity {
 
                 if (isTripStarted) {
                     textViewCurrentDetail.setText("");
-//                sensorManager.unregisterListener();
-//                locationManager.removeUpdates(this);
                     endTime = new Date();
                     textViewCurrentDetail.append(startTime+" -Start\n"+endTime+" -End"+"\n\n\n Results:\n"+violationsBuilder);
                     isTripStarted = false;
